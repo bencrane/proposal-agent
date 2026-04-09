@@ -1,46 +1,41 @@
 import Fastify from "fastify";
-import { getEnv } from "./config/env";
+import { getEnv, getReadiness } from "./config/env";
 import { loadAllTenants } from "./lib/tenant-config";
 import { healthRoutes } from "./routes/health";
 import { calcomWebhookRoutes } from "./routes/webhooks/calcom";
 import { proposalRoutes } from "./routes/proposals";
-import { startSlack } from "./slack/app";
 
 async function main() {
-  // Load environment
   const env = getEnv();
+  const { ready, missing } = getReadiness();
 
-  // Load tenant configs from disk
   loadAllTenants();
 
-  // Initialize Fastify
   const app = Fastify({
-    logger: {
-      level: env.LOG_LEVEL,
-    },
+    logger: { level: env.LOG_LEVEL },
   });
 
-  // Register routes
   await app.register(healthRoutes);
   await app.register(calcomWebhookRoutes);
   await app.register(proposalRoutes);
 
-  // Start Fastify
-  await app.listen({ port: env.PORT, host: "0.0.0.0" });
-  console.log(`🚀 Proposal Agent API running on port ${env.PORT}`);
+  const port = env.PORT;
+  await app.listen({ port, host: "0.0.0.0" });
 
-  // Start Slack bot (socket mode — runs alongside Fastify)
-  await startSlack();
+  if (env.SLACK_BOT_TOKEN && env.SLACK_SIGNING_SECRET && env.SLACK_APP_TOKEN) {
+    const { startSlack } = await import("./slack/app");
+    await startSlack();
+    console.log("⚡ Slack bot is running");
+  }
 
   console.log(`
 ╔══════════════════════════════════════════════════════╗
 ║           PROPOSAL AGENT — RUNNING                   ║
-║                                                      ║
-║  API:    http://localhost:${env.PORT}                    ║
-║  Health: http://localhost:${env.PORT}/health              ║
-║  Slack:  Socket mode (listening for messages)        ║
-║                                                      ║
-║  Waiting for Cal.com webhooks...                     ║
+║  API:    http://0.0.0.0:${port}                          ║
+║  Health: http://0.0.0.0:${port}/health                    ║
+╠══════════════════════════════════════════════════════╣
+║  ✅ Ready:   ${ready.join(", ") || "none"}
+║  ⚠️  Missing: ${missing.join(", ") || "none — fully configured!"}
 ╚══════════════════════════════════════════════════════╝
   `);
 }
