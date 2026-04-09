@@ -1,32 +1,35 @@
 import { z } from "zod";
 
+const emptyStringToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess((value) => (value === "" ? undefined : value), schema);
+
 const envSchema = z.object({
   // Supabase (shared with Service-Engine-X)
-  SUPABASE_URL: z.string().url().optional(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  SUPABASE_URL: emptyStringToUndefined(z.string().url().optional()),
+  SUPABASE_SERVICE_ROLE_KEY: emptyStringToUndefined(z.string().min(1).optional()),
 
   // Service-Engine-X Internal API
-  SERVICE_ENGINE_API_URL: z.string().url().default("https://api.serviceengine.xyz"),
-  SERVICE_ENGINE_INTERNAL_KEY: z.string().min(1).optional(),
+  SERVICE_ENGINE_API_URL: emptyStringToUndefined(z.string().url().default("https://api.serviceengine.xyz")),
+  SERVICE_ENGINE_INTERNAL_KEY: emptyStringToUndefined(z.string().min(1).optional()),
 
   // OpenAI
-  OPENAI_API_KEY: z.string().min(1).optional(),
+  OPENAI_API_KEY: emptyStringToUndefined(z.string().min(1).optional()),
 
   // Granola
-  GRANOLA_API_KEY: z.string().min(1).optional(),
+  GRANOLA_API_KEY: emptyStringToUndefined(z.string().min(1).optional()),
 
   // Slack
-  SLACK_BOT_TOKEN: z.string().min(1).optional(),
-  SLACK_SIGNING_SECRET: z.string().min(1).optional(),
-  SLACK_APP_TOKEN: z.string().min(1).optional(),
+  SLACK_BOT_TOKEN: emptyStringToUndefined(z.string().min(1).optional()),
+  SLACK_SIGNING_SECRET: emptyStringToUndefined(z.string().min(1).optional()),
+  SLACK_APP_TOKEN: emptyStringToUndefined(z.string().min(1).optional()),
 
   // Cal.com
-  CALCOM_WEBHOOK_SECRET: z.string().min(1).optional(),
+  CALCOM_WEBHOOK_SECRET: emptyStringToUndefined(z.string().min(1).optional()),
 
   // App
-  PORT: z.coerce.number().default(3100),
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+  PORT: emptyStringToUndefined(z.coerce.number().int().min(1).max(65535).default(3100)),
+  NODE_ENV: emptyStringToUndefined(z.enum(["development", "production", "test"]).default("development")),
+  LOG_LEVEL: emptyStringToUndefined(z.enum(["debug", "info", "warn", "error"]).default("info")),
 });
 
 export type Env = z.infer<typeof envSchema>;
