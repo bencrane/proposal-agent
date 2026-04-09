@@ -1,0 +1,10 @@
+{
+  "slug": "outboundsolutions",
+  "name": "Outbound Solutions",
+  "org_id": "REPLACE_WITH_YOUR_SERVICE_ENGINE_ORG_UUID",
+  "organizer_emails": [
+    "you@outboundsolutions.com"
+  ],
+  "slack_channel_id": "REPLACE_WITH_SLACK_CHANNEL_ID",
+  "default_pricing_model": "setup_plus_performance"
+}

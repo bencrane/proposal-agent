@@ -1,0 +1,27 @@
+{
+  "name": "proposal-agent",
+  "version": "1.0.0",
+  "description": "AI proposal generation agent — writes to Service-Engine-X",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "migrate": "tsx src/lib/migrate.ts"
+  },
+  "dependencies": {
+    "@slack/bolt": "^4.1.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "fastify": "^5.2.0",
+    "openai": "^4.85.0",
+    "zod": "^3.24.0",
+    "nanoid": "^3.3.8",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.19.0"
+  }
+}
