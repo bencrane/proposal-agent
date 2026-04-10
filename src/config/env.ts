@@ -22,6 +22,16 @@ const envSchema = z.object({
   SLACK_BOT_TOKEN: emptyStringToUndefined(z.string().min(1).optional()),
   SLACK_SIGNING_SECRET: emptyStringToUndefined(z.string().min(1).optional()),
   SLACK_APP_TOKEN: emptyStringToUndefined(z.string().min(1).optional()),
+  SLACK_ENABLE_SOCKET_MODE: z.preprocess((value) => {
+    if (value === "" || value === undefined || value === null) return false;
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") return value !== 0;
+    if (typeof value === "string") {
+      const normalized = value.trim().toLowerCase();
+      return ["1", "true", "yes", "on"].includes(normalized);
+    }
+    return false;
+  }, z.boolean()),
 
   // Cal.com
   CALCOM_WEBHOOK_SECRET: emptyStringToUndefined(z.string().min(1).optional()),
@@ -58,7 +68,12 @@ export function getReadiness(): { ready: string[]; missing: string[] } {
     service_engine: !!(env.SERVICE_ENGINE_INTERNAL_KEY),
     openai: !!(env.OPENAI_API_KEY),
     granola: !!(env.GRANOLA_API_KEY),
-    slack: !!(env.SLACK_BOT_TOKEN && env.SLACK_SIGNING_SECRET && env.SLACK_APP_TOKEN),
+    slack: !!(
+      env.SLACK_ENABLE_SOCKET_MODE &&
+      env.SLACK_BOT_TOKEN &&
+      env.SLACK_SIGNING_SECRET &&
+      env.SLACK_APP_TOKEN
+    ),
     calcom: !!(env.CALCOM_WEBHOOK_SECRET),
   };
 
